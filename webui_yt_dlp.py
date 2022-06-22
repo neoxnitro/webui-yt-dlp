@@ -1,4 +1,3 @@
-import distutils
 import getopt
 import json
 import os
@@ -76,10 +75,10 @@ def index():
 # download files link
 @app.route('/' + DOWNLOAD_DIR +'/<path:filename>', methods=['GET', 'POST'])
 def download(filename, os=None):
-    print("download file from host to client:[" + filename + "]")
+    print(download.__name__, "file from host to client:[" + filename + "]")
     donwload_location = app.root_path
     l_donwload_location = path.join(donwload_location, DOWNLOAD_DIR)
-    print("path: " + l_donwload_location)
+    print(download.__name__, "path: " + l_donwload_location)
     return send_from_directory(directory=l_donwload_location, filename=filename)
 
 # html icon
@@ -107,14 +106,14 @@ def handle_json(xjson):
 # get video formats request from client
 @socketio.on('getFormat')
 def handle_getformat(xjson):
-    print('received getFormat')
+    print(handle_getformat.__name__, 'received')
     fct_get_video_formats(xjson)
 
 # stop process request from client
 @socketio.on('stop_thread')
 def handle_stop_thread(xjson):
     global thread_running
-    print('received stop_thread')
+    print(handle_stop_thread.__name__, 'received')
 
     arg_dict = json.loads(xjson)
     thread_running[int(arg_dict['thread_id'])] = False
@@ -127,6 +126,10 @@ def fct_get_video_formats(xjson):
     emit('video_formats', "processing")
 
     youtube_dl_popen = ['yt-dlp.exe']
+
+    # currently "list" is not supported yet
+    if "&list=" in arg_dict['video']:
+        arg_dict['video'] = re.split("&list=", arg_dict['video'])[0]
 
     if arg_dict['video'] != "":
         youtube_dl_popen.append('-F')
@@ -145,7 +148,7 @@ def fct_get_video_formats(xjson):
 
         except OSError:
             # the os throws an exception if there is no data
-            print('[No more data]')
+            print(fct_get_video_formats.__name__, '[No more data]')
             emit('video_formats', "error")
             return
 
@@ -174,16 +177,16 @@ def fct_get_video_formats(xjson):
 
         elif len(l_formats_dico) == l_before_formats_dico_len \
                 and l_before_formats_dico_len == 0:
-            #print("looking for an error")
+            #print(fct_get_video_formats.__name__, "looking for an error")
             for line in process_out_list:
                 if "error" in line.lower() or "warning" in line.lower():
-                    print("error: " + line)
+                    print(fct_get_video_formats.__name__, "error: " + line)
                     l_formats_dico[-1] = line
                     emit('video_formats', l_formats_dico)
                     return
 
         if not process_out_raw:
-            print('[No more data]')
+            print(fct_get_video_formats.__name__, '[No more data]')
             return
 
 # thread function "download video + convert to audio" (asynchronous communication)
@@ -215,9 +218,13 @@ def fct_download_video(xjson, dl_id):
     data_dict['format_desc'] = ''
     socketio.send(data_dict, json=True)
 
-    print('Thread creation [Download]: ' + str(json))
+    print(fct_download_video.__name__, 'Thread creation [Download]: ' + str(json))
 
     youtube_dl_popen = ['yt-dlp.exe']
+
+    # currently "list" is not supported yet
+    if "&list=" in arg_dict['video']:
+        arg_dict['video'] = re.split("&list=", arg_dict['video'])[0]
 
     if arg_dict['video'] != "":
         youtube_dl_popen.append(arg_dict['video'])
@@ -253,7 +260,7 @@ def fct_download_video(xjson, dl_id):
     # remove exotic characters
     youtube_dl_popen.append("--restrict-filenames")
 
-    print('youtube_dl_popen:' + str(youtube_dl_popen))
+    print(fct_download_video.__name__, 'youtube_dl_popen:' + str(youtube_dl_popen))
     process = subprocess.Popen(youtube_dl_popen, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     last_sent_process_out = ""
@@ -274,7 +281,6 @@ def fct_download_video(xjson, dl_id):
 
     proccessing = 0
     while (True):
-        print("while loop .............")
         proccessing += 1
 
         if proccessing == 4:
@@ -288,7 +294,7 @@ def fct_download_video(xjson, dl_id):
 
         except OSError as error:
             # the os throws an exception if there is no data
-            print('OSError:' + error)
+            print(fct_download_video.__name__, 'OSError:' + error)
             data_dict['progress'] = 'OSError' + error
             data_dict['step'] = 'Error'
             data_dict['action'] = 'none'
@@ -297,18 +303,18 @@ def fct_download_video(xjson, dl_id):
             socketio.send(data_dict, json=True)
             return
         end = time.time()
-        print("Elapsed exec time: " + str(end - start))
+        print(fct_download_video.__name__, "Elapsed exec time: " + str(end - start))
 
         # remove if string is too small (end of process)
         if len(process_out_raw) < 10:
             process_out_raw = ""
 
         process_out = process_out_raw.rstrip()
-        print("process_out: [" + process_out + "]")
+        print(fct_download_video.__name__, "process_out: [" + process_out + "]")
 
         # thread still allowed to run ?
         if not thread_running[thread_id]:
-            print("Thread [" + str(thread_id) + "] has been stopped")
+            print(fct_download_video.__name__, "Thread [" + str(thread_id) + "] has been stopped")
             data_dict['progress'] = 'Stopped By User'
             data_dict['step'] = 'Aborted'
             data_dict['action'] = 'none'
@@ -319,7 +325,7 @@ def fct_download_video(xjson, dl_id):
 
         # looking for an error
         if "error" in process_out or "ERROR" in process_out:
-            print("Error detected line:" + process_out)
+            print(fct_download_video.__name__, "Error detected line:" + process_out)
             data_dict['step'] = 'Error'
             data_dict['progress'] = process_out
             data_dict['action'] = 'false'
@@ -333,7 +339,7 @@ def fct_download_video(xjson, dl_id):
             l_output_filename = process_out.split(" Destination: ", 1)[1]
             l_output_filename = os.path.basename(l_output_filename)
             l_output_filename = re.sub(r'.f\d{2}.', '', l_output_filename)
-            print("Destination out found :[" + str(l_output_filename) + "]")
+            print(fct_download_video.__name__, "Destination out found :[" + str(l_output_filename) + "]")
             data_dict['output_filename'] = l_output_filename
             data = json.dumps(data_dict)
 
@@ -342,13 +348,13 @@ def fct_download_video(xjson, dl_id):
             l_output_filename = re.split("\[download\] | has already been downloaded", process_out)[1]
             l_output_filename = os.path.basename(l_output_filename)
             l_output_filename = re.sub(r'.f\d{2}.', '', l_output_filename)
-            print("Destination out found :[" + l_output_filename + "]")
+            print(fct_download_video.__name__, "Destination out found :[" + l_output_filename + "]")
             data_dict['output_filename'] = l_output_filename
             data = json.dumps(data_dict)
 
         # detect end of process
         if not process_out and float(end - start) < float(0.00003):
-            print("End of process")
+            print(fct_download_video.__name__, "End of process")
             if "generic" in last_sent_process_out or last_sent_process_out == "":
                 data_dict['step'] = 'Error'
                 data_dict['progress'] = "Something bad happened ¯\_(ツ)_/¯"
@@ -368,14 +374,14 @@ def fct_download_video(xjson, dl_id):
         # ignore some string # send only delta
         if not "Deleting original file download" in process_out \
                 and last_sent_process_out != process_out and process_out:
-            print("sendddinnnnggg ...")
             data_dict['progress'] = process_out
             socketio.send(data_dict, json=True)
             last_sent_process_out = process_out
         else:
-            print("Hey, there are totally identical !!!")
+            print(fct_download_video.__name__, "Hey, there are totally identical !!!")
 
 # main function
 if __name__ == '__main__':
+
 
     create_app()
