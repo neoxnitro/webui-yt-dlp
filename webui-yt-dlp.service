@@ -14,7 +14,7 @@ UMask=007
 
 WorkingDirectory=/home/odroid/webui-yt-dlp/
  
-ExecStart=/home/odroid/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call "webui-yt-dlp:create_app"
+ExecStart=/home/odroid/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call "webui_yt_dlp:create_app"
  
 #Restart=on-failure
 Restart=always
