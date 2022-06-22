@@ -12,9 +12,9 @@ User=odroid
 Group=odroid
 UMask=007
 
-WorkingDirectory=/home/odroid/youtube-web-ui/
+WorkingDirectory=/home/odroid/webui-yt-dlp/
  
-ExecStart=/home/odroid/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call "youtube-web-ui:create_app"
+ExecStart=/home/odroid/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call "webui-yt-dlp:create_app"
  
 #Restart=on-failure
 Restart=always

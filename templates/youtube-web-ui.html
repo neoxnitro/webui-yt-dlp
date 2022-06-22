@@ -1,0 +1,334 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1 class="text-center" style="margin-top:20px;">
+    <img src="{{url_for('static', filename='youtubeico.png')}}" align="middle" />
+    {% block title %} Youtube-dl WebUI {% endblock %}
+
+
+</h1>
+
+
+<div class="container mt-3">
+
+    <div class="row">
+      <input name="tags" type="text" id="m" placeholder="Youtube link here" class="form-control" autocomplete="off" />
+    </div>
+
+    <div class="row" style="margin-top:10px">
+        <div class="col-md-auto">
+            <button onclick="getFormats()">Get Formats</button>
+        </div>
+        <div class="col-md-auto">
+            <button onclick="getVideo()">Download</button>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="check_extract_audio" onclick="showMe('convert_audio_format', this)">
+            <label class="form-check-label" for="check_extract_audio">Extract audio</label>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:5px">
+        <div style="display: none" id="convert_audio_format">
+            <div class="row" >
+                <div class="col col-lg-1">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="check_convert_into_mp3" onclick="selectme('check_convert_into_mp3', this)">
+                      <label class="form-check-label" for="check_convert_into_mp3">mp3</label>
+                    </div>
+                </div>
+                <div class="col col-lg-1">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="check_convert_into_aac" onclick="selectme('check_convert_into_aac', this)">
+                      <label class="form-check-label" for="check_convert_into_aac">aac</label>
+                    </div>
+                </div>
+                <div class="col col-lg-1">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="check_convert_into_m4a" onclick="selectme('check_convert_into_m4a', this)">
+                      <label class="form-check-label" for="check_convert_into_m4a">m4a</label>
+                    </div>
+                </div>
+                <div class="col col-lg-1">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="check_convert_into_flac" onclick="selectme('check_convert_into_flac', this)">
+                      <label class="form-check-label" for="check_convert_into_flac">flac</label>
+                    </div>
+                </div>
+                <div class="col col-lg-1">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="check_convert_into_wav" onclick="selectme('check_convert_into_wav', this)">
+                      <label class="form-check-label" for="check_convert_into_wav">wav</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div class="row" id="table_format">
+
+    </div>
+ </div>
+
+
+<div class="container mt-3">
+  <table class="table" >
+    <thead>
+      <tr>
+        <th style="display:none">Thread ID</th>
+        <th style="width:10%">Action</th>
+        <th style="width:10%">Step</th>
+        <th style="width:5%">Format</th>
+        <th style="width:50%">Progress</th>
+        <th style="width:40%">Link</th>
+      </tr>
+    </thead>
+    <tbody id="xtable">
+      <tr>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    var thread_dict = {};
+    var selected_format = 0;
+    var selected_format_desc= "";
+
+    function selectme(it, box)
+    {
+        var vis = (box.checked) ? "block" : "none";
+
+        var list = document.querySelectorAll('[id^="check_convert_into_"]');
+        for (const element of list)
+        {
+             element.checked = false;
+        }
+        box.checked = true;
+    }
+
+    function showMe (it, box)
+    {
+        var vis = (box.checked) ? "block" : "none";
+        var found_one_checked = false;
+
+        var list = document.querySelectorAll('[id^="check_convert_into_"]');
+        for (const element of list)
+        {
+             if(element.checked == true)
+                found_one_checked = true;
+        }
+        // select a default value
+        if (found_one_checked == false)
+        {
+            document.getElementById("check_convert_into_mp3").checked = true;
+        }
+        document.getElementById(it).style.display = vis;
+
+    }
+
+    function stop_thread(thread_id)
+    {
+        console.log("stop thread id: " + thread_id);
+        socket.emit('stop_thread', '{ "thread_id" : "' + thread_id + '"}');
+    }
+
+    function clear_selected_format()
+    {
+        console.log("clear_selected_format: ");
+        selected_format = 0;
+        selected_format_desc = "";
+        var Table = document.getElementById("table_format");
+        Table.innerHTML = ""
+    }
+
+    function get_selected_format_link_string(format, format_desc)
+    {
+        // if selected format is "unselected" return empty string
+        if (selected_format == 0)
+            return "";
+
+        // add a checkbox (to remove the selected format) and text with the format description
+        var data = '<div class="container mt-2">\
+	    <div class="form-check form-switch">\
+	    <input class="form-check-input" type="checkbox" onclick="clear_selected_format()" checked>\
+	    <small><em>\
+	    Selected format: \
+	    <cite title='+format+'>' + format_desc + '</cite></footer>\
+	    </em></small>\
+	    </div></div>';
+	    return data
+    }
+
+	function getVideo()
+	{
+        console.log("getVideo: ");
+        var video_link =  document.getElementById('m').value ;
+
+        if ( video_link == "")
+            return;
+
+        var l_check_convert_into_mp3 =  document.getElementById('check_convert_into_mp3').checked ;
+
+        var extract_audio = document.getElementById("check_extract_audio").checked;
+        var audio_format = "";
+
+        var list = document.querySelectorAll('[id^="check_convert_into_"]');
+        for (const element of list)
+        {
+             if(element.checked == true)
+                audio_format = element.id;
+        }
+
+        var json_request = '{ "video" : "' + video_link + '"';
+        json_request += ', "format" : "' + selected_format +'"';
+        json_request += ', "format_desc" : "' + selected_format_desc +'"';
+        json_request += ', "extract_audio" : ' + extract_audio;
+        json_request += ', "audio_format" : "' + audio_format + '"';
+        json_request += '}';
+
+        console.log("json: " + json_request);
+
+        socket.emit('download_video', json_request);
+        document.getElementById('m').value = "";
+
+        var Table = document.getElementById("table_format");
+	    Table.innerHTML = get_selected_format_link_string(selected_format, selected_format_desc) ;
+
+    };
+
+    function getFormats()
+	{
+	    console.log("getFormats: ");
+	    var video_link =  document.getElementById('m').value ;
+
+        if ( video_link == "")
+            return;
+
+        socket.emit('getFormat', '{ "video" : "' + video_link + '"}');
+    };
+
+    function select_format(format, description)
+    {
+        console.log("select_format: ");
+        selected_format = format;
+        selected_format_desc = description;
+        var Table = document.getElementById("table_format");
+	    Table.innerHTML = get_selected_format_link_string(selected_format, selected_format_desc) ;
+    };
+
+    socket.on("video_formats", function (data)
+    {
+        console.log("video_formats: ");
+
+        var Table = document.getElementById("table_format");
+
+        if (data == "processing")
+        {
+            Table.innerHTML = "Processing ...";
+            return;
+        }
+        else if (data == "error")
+        {
+            Table.innerHTML = "Error ! (something bad happened, you can blame the dev)";
+            return;
+        }
+
+	    var format_table_inject = '<table class="table" > \
+                                <thead>\
+                                    <tr>\
+                                    <th>code</th>\
+                                    <th>description</th>\
+                                    </tr>\
+                                </thead>\
+                                <tbody>\
+                                ';
+
+        for (const [key, value] of Object.entries(data))
+        {
+             var href_var = 'javascript:select_format('+ key +',\'' + value + '\');'
+             //console.log(key + " : " + href_var);
+             format_table_inject += '<tr>\
+                            ';
+             if (key > 0)
+             {
+                format_table_inject += '<td><a href="' + href_var + '">' + key + '</a></td>';
+             }
+             else
+             {
+                format_table_inject += '<td></td>';
+             }
+
+             format_table_inject += '<td>' + value + '</td>';
+             format_table_inject += '</tr>\
+                            ';
+        };
+
+      format_table_inject += '</tbody>\
+                            </table>\
+                            ';
+        Table.innerHTML = format_table_inject;
+    });
+
+    socket.on("json", function (data)
+    {
+      console.log("download_video data received");
+      var json_data = JSON.parse(JSON.stringify(data))
+      thread_dict[json_data.dl_id] = json_data;
+
+      // clear table
+      var Table = document.getElementById("xtable");
+	  Table.innerHTML = "";
+	  var table_data_inject = "";
+
+      // populate the table
+        for (const [key, value] of Object.entries(thread_dict)) {
+              //console.log(key, value);
+              table_data_inject += '<tr>';
+              table_data_inject += '<td style="display:none;">' + value.thread_id + '</td>';
+              //console.log("value.action: " + value.action)
+              if (value.action == "stop")
+              {
+                table_data_inject += '<td><button type="button" onclick="stop_thread(' + value.thread_id + ')" class="btn btn-danger">stop</button></td>';
+              }
+              else if (value.action == "download")
+              {
+                var org_file_name = value.output_filename;
+                var file_name = encodeURI(value.output_filename);
+                var download_url = '/download/' + file_name;
+                table_data_inject += '<td>';
+                table_data_inject += '<a accept-charset="UTF-8" href="' + download_url + '" download="' + org_file_name + '">';
+                table_data_inject += '<button type="button">Download</button>';
+                table_data_inject += '</a>';
+              }
+              else
+              {
+                table_data_inject += '<td></td>';
+              }
+              table_data_inject += '<td>' + value.step + '</td>';
+              table_data_inject += '<td><cite title="' + value.format_desc + '">' + value.format + '</cite></td>';
+              table_data_inject += '<td>' + value.progress + '</td>';
+              table_data_inject += '<td>' + value.link + '</td>';
+              table_data_inject += '</tr>';
+        }
+        //console.log("tr: " + table_data_inject);
+        Table.innerHTML = table_data_inject;
+
+    });
+
+    //socket.on('connect', function() {
+    //    socket.emit('json', '{ "hi" : "hello"');
+    //});
+</script>
+
+
+{% endblock %}

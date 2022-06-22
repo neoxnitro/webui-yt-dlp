@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/bootstrap.min.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
+
+      <!--
+    <script>
+window.setTimeout(function() {
+    $(".alert").fadeTo(500, 0)
+}, 4000);
+alert("I am an alert box!");
+    </script>
+    -->
+
+    <title>{% block title %} {% endblock %}</title>
+  </head>
+
+
+  <body>
+
+    <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+              {% endfor %}
+            {% endwith %}
+
+            {% block content %} {% endblock %}
+    </div>
+
+
+
+<!--
+    <div class="mt-4 p-5 bg-primary text-white rounded">
+        <h1>Jumbotron Example</h1>
+        <p>Lorem ipsum 2...</p>
+    </div>
+    -->
+
+<div class="footer fixed-bottom">
+  <div class="container">
+    <span class="text-muted">Beta.</span>
+  </div>
+</div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename= 'js/bootstrap.bundle.min.js') }}"  crossorigin="anonymous"></script>
+
+    <!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    -->
+  </body>
+
+</html>
