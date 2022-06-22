@@ -1,0 +1,26 @@
+[Unit]
+Description=Youtube web UI app service
+After=network.target
+
+StartLimitInterval=200
+StartLimitBurst=5
+ 
+[Service]
+Type=simple
+ 
+User=odroid
+Group=odroid
+UMask=007
+
+WorkingDirectory=/home/odroid/youtube-web-ui/
+ 
+ExecStart=/home/odroid/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call "youtube-web-ui:create_app"
+ 
+#Restart=on-failure
+Restart=always
+ 
+# Configures the time to wait before service is stopped forcefully.
+TimeoutStopSec=30
+ 
+[Install]
+WantedBy=multi-user.target
