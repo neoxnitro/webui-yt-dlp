@@ -9,8 +9,8 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 - Windows 10
 
 ### Features
-- Support video convertion into multiple audio format (MP3, FLAC, WAV, MP4a, aac)
-- Retrive of all supported formats and possibility to select a specific format (Video & Audio, Video only, Audio only)
+- Support video convertion into multiple audio format (mp3, flac, wav, mp4a, aac)
+- Retrive of all supported formats and possibility to select a specific format (Video & Audio, Video only, Audio only, with various caracteristics)
 - Parallel download request is supported
 
 
@@ -19,7 +19,7 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 - ffmpeg (optional, if you want extract audio function)
 - waitress-serve (optional, if you want make the main Python script as a linux service)
 
-### Installation (linux)
+### Installation (linux)(manual launch)
 - git clone git@github.com:neoxnitro/webui-yt-dlp.git
 - cd webui-yt-dlp
 - pip3 install -r requirements.txt
@@ -34,4 +34,24 @@ WebSocket transport not available. Install simple-websocket for improved perform
    Use a production WSGI server instead.
  * Debug mode: off
  * Running on http://0.0.0.0:5005/ (Press CTRL+C to quit)
+```
+
+### Installation as a Linux service (Python waitress-serve is required !)
+- cd webui-yt-dlp
+- sudo cp webui-yt-dlp.service /etc/systemd/system/
+- sudo systemctl enable webui-yt-dlp.service
+- sudo systemctl daemon-reload
+- sudo systemctl start webui-yt-dlp.service
+- sudo systemctl status webui-yt-dlp.service
+
+```php
+root@root:~/webui-yt-dlp$ sudo systemctl status webui-yt-dlp.service 
+● webui-yt-dlp.service - Youtube web UI app service
+   Loaded: loaded (/etc/systemd/system/webui-yt-dlp.service; enabled; vendor preset: enabled)
+   Active: active (running) since Wed 2022-06-22 14:55:52 CEST; 20h ago
+ Main PID: 14325 (waitress-serve)
+    Tasks: 2 (limit: 2127)
+   Memory: 37.1M
+   CGroup: /system.slice/webui-yt-dlp.service
+           └─14325 /usr/bin/python3 /home/root/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call webui_yt_dlp:create_app
 ```
