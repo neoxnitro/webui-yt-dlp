@@ -25,6 +25,7 @@ DOWNLOAD_DIR = "download"
 FFMPEG_PATH = ""
 LINUX_FFMPEG_PATH = "/usr/bin/ffmpeg"
 WINDOWS_FFMPEG_PATH = "C:\\Users\\Utilisateur\\Downloads\\bin\\ffmpeg.exe"
+HTTP_PORT = 5005
 
 super_dl_id = 999999999
 thread_running = {}
@@ -58,7 +59,7 @@ def create_app():
 
     if os.name == "posix":
         FFMPEG_PATH = LINUX_FFMPEG_PATH
-        socketio.run(app, host="0.0.0.0", port=5005)
+        socketio.run(app, host="0.0.0.0", port=HTTP_PORT)
 
     if os.name == "nt":
         FFMPEG_PATH = WINDOWS_FFMPEG_PATH
