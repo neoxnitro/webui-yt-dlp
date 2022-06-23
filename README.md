@@ -13,11 +13,24 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 - Retrive of all supported formats and possibility to select a specific format (Video & Audio, Video only, Audio only, with various caracteristics)
 - Parallel download request is supported
 
-
 ### Requirement
 - Python 3.7
 - ffmpeg (optional, if you want extract audio function)
 - waitress-serve (optional, if you want make the main Python script as a linux service)
+
+### Parameters
+
+You have the possibility easily change the parameters directly by editing main Python script **webui-yt-dlp.py**
+
+```python
+   # global parameters
+   DOWNLOAD_DIR = "download"
+   LINUX_FFMPEG_PATH = "/usr/bin/ffmpeg"
+   WINDOWS_FFMPEG_PATH = "C:\\Users\\Utilisateur\\Downloads\\bin\\ffmpeg.exe"
+   HTTP_PORT = 5005
+```
+
+N.B if you will use waitress-serve, the server port is also present into the file **webui-yt-dlp.service**
 
 ### Installation (linux)(manual launch)
 - git clone git@github.com:neoxnitro/webui-yt-dlp.git
