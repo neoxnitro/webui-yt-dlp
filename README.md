@@ -15,6 +15,7 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 
 ### Requirement
 - Python 3.7
+- yt-dlp <https://github.com/yt-dlp/yt-dlp>
 - ffmpeg (optional, if you want extract audio function)
 - waitress-serve (optional, if you want make the main Python script as a linux service)
 
