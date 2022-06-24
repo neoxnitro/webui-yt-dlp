@@ -10,7 +10,7 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 
 ### Features
 - Support video convertion into multiple audio format (mp3, flac, wav, mp4a, aac)
-- Retrive of all supported formats and possibility to select a specific format (Video & Audio, Video only, Audio only, with various caracteristics)
+- Possibility to retrive of all supported formats and select a specific one (Video & Audio, Video only, Audio only, with various caracteristics)
 - Parallel download request is supported
 
 ### Requirement
