@@ -21,7 +21,7 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 
 ### Parameters
 
-You have the possibility easily change the parameters directly by editing main Python script **webui-yt-dlp.py**
+You have the possibility to easily change the parameters directly by editing main Python script **webui-yt-dlp.py**
 
 ```python
    # global parameters
