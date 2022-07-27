@@ -99,7 +99,8 @@ def handle_json(xjson):
     global thread_running
 
     print('received json: ' + str(xjson))
-    job_thread = socketio.start_background_task(fct_download_video, xjson, super_dl_id)
+    sid = request.sid
+    job_thread = socketio.start_background_task(fct_download_video, sid, xjson, super_dl_id)
     thread_running[job_thread.ident] = True
     # decrement the thread dl_id (result, a download reverted list (first = new one))
     super_dl_id -= 1
@@ -110,8 +111,6 @@ def handle_json(xjson):
 def handle_getformat(xjson):
     print(handle_getformat.__name__, 'received')
     sid = request.sid
-    print("sid:", sid)
-
     fct_get_video_formats(sid, xjson)
 
 # stop process request from client
@@ -195,10 +194,9 @@ def fct_get_video_formats(sid, xjson):
             return
 
 # thread function "download video + convert to audio" (asynchronous communication)
-def fct_download_video(xjson, dl_id):
+def fct_download_video(sid, xjson, dl_id):
     global thread_running
     var = 0
-
     thread_id = threading.get_ident()
 
     arg_dict = json.loads(xjson)
@@ -221,7 +219,7 @@ def fct_download_video(xjson, dl_id):
     data_dict['action'] = 'none'
     data_dict['format'] = ''
     data_dict['format_desc'] = ''
-    socketio.send(data_dict, json=True)
+    socketio.send(data_dict, json=True, to=sid)
 
     print(fct_download_video.__name__, 'Thread creation [Download]: ' + str(json))
 
@@ -305,7 +303,7 @@ def fct_download_video(xjson, dl_id):
             data_dict['action'] = 'none'
             data_dict['format'] = ''
             data_dict['format_desc'] = ''
-            socketio.send(data_dict, json=True)
+            socketio.send(data_dict, json=True, to=sid)
             return
         end = time.time()
         print(fct_download_video.__name__, "Elapsed exec time: " + str(end - start))
@@ -325,7 +323,7 @@ def fct_download_video(xjson, dl_id):
             data_dict['action'] = 'none'
             data_dict['format'] = ''
             data_dict['format_desc'] = ''
-            socketio.send(data_dict, json=True)
+            socketio.send(data_dict, json=True, to=sid)
             return
 
         # looking for an error
@@ -336,7 +334,7 @@ def fct_download_video(xjson, dl_id):
             data_dict['action'] = 'false'
             data_dict['format'] = ''
             data_dict['format_desc'] = ''
-            socketio.send(data_dict, json=True)
+            socketio.send(data_dict, json=True, to=sid)
             return
 
         # looking for "destination" file name
@@ -370,17 +368,17 @@ def fct_download_video(xjson, dl_id):
                 data_dict['progress'] = last_sent_process_out
                 data_dict['action'] = 'download'
 
-            socketio.send(data_dict, json=True)
+            socketio.send(data_dict, json=True, to=sid)
             return
         else:
             data_dict['step'] = "Processing " + ("." * proccessing)
-            socketio.send(data_dict, json=True)
+            socketio.send(data_dict, json=True, to=sid)
 
         # ignore some string # send only delta
         if not "Deleting original file download" in process_out \
                 and last_sent_process_out != process_out and process_out:
             data_dict['progress'] = process_out
-            socketio.send(data_dict, json=True)
+            socketio.send(data_dict, json=True, to=sid)
             last_sent_process_out = process_out
         else:
             print(fct_download_video.__name__, "Hey, there are totally identical !!!")
