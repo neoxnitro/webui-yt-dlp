@@ -100,9 +100,18 @@
 
 <script type="text/javascript" charset="utf-8">
     var socket = io();
+    var socketConnected = false;
     var thread_dict = {};
     var selected_format = 0;
     var selected_format_desc= "";
+
+    socket.connect()
+
+    socket.on('connect', function()
+     {
+        socketConnected = true;
+        console.log('Connected! ID: ' + socket.id);
+    });
 
     function selectme(it, box)
     {
@@ -228,6 +237,7 @@
 
     socket.on("video_formats", function (data)
     {
+        console.log('ID: ' + socket.id);
         console.log("video_formats: ");
 
         var Table = document.getElementById("table_format");

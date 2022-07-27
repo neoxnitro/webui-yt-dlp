@@ -8,8 +8,9 @@ import threading
 import time
 from os import read, path
 
-from flask import Flask, render_template, send_from_directory
-from flask_socketio import SocketIO, emit
+from flask import Flask, render_template, send_from_directory, request
+from flask_socketio import SocketIO
+
 
 
 # Disable print
@@ -88,7 +89,7 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-# socket (for inter process communication between the python thread and clien HTML page)
+# socket (for inter process communication between the python thread and client HTML page)
 socketio = SocketIO(app, async_mode='threading')
 
 # download video request from client
@@ -108,7 +109,10 @@ def handle_json(xjson):
 @socketio.on('getFormat')
 def handle_getformat(xjson):
     print(handle_getformat.__name__, 'received')
-    fct_get_video_formats(xjson)
+    sid = request.sid
+    print("sid:", sid)
+
+    fct_get_video_formats(sid, xjson)
 
 # stop process request from client
 @socketio.on('stop_thread')
@@ -120,11 +124,11 @@ def handle_stop_thread(xjson):
     thread_running[int(arg_dict['thread_id'])] = False
 
 # thread function "get video formats" (asynchronous communication)
-def fct_get_video_formats(xjson):
+def fct_get_video_formats(sid, xjson):
     arg_dict = json.loads(xjson)
     l_formats_dico = {}
 
-    emit('video_formats', "processing")
+    socketio.emit('video_formats', "processing", to=sid)
 
     youtube_dl_popen = ['yt-dlp.exe']
 
@@ -150,7 +154,7 @@ def fct_get_video_formats(xjson):
         except OSError:
             # the os throws an exception if there is no data
             print(fct_get_video_formats.__name__, '[No more data]')
-            emit('video_formats', "error")
+            socketio.emit('video_formats', "error", to=sid)
             return
 
         # remove if string is too small (end of process)
@@ -174,7 +178,7 @@ def fct_get_video_formats(xjson):
                 l_formats_dico[code] = text
 
         if len(l_formats_dico) > l_before_formats_dico_len:
-            emit('video_formats', l_formats_dico)
+            socketio.emit('video_formats', l_formats_dico, to=sid)
 
         elif len(l_formats_dico) == l_before_formats_dico_len \
                 and l_before_formats_dico_len == 0:
@@ -183,7 +187,7 @@ def fct_get_video_formats(xjson):
                 if "error" in line.lower() or "warning" in line.lower():
                     print(fct_get_video_formats.__name__, "error: " + line)
                     l_formats_dico[-1] = line
-                    emit('video_formats', l_formats_dico)
+                    socketio.emit('video_formats', l_formats_dico, to=sid)
                     return
 
         if not process_out_raw:
