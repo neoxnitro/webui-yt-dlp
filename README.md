@@ -1,4 +1,5 @@
-<site_meta name="google-site-verification" content="8sSXS-rETrfpLP1KjWjA1iLssLwKqxvjygdSD3vzrIY" />
+<meta name="google-site-verification" content="8sSXS-rETrfpLP1KjWjA1iLssLwKqxvjygdSD3vzrIY" />
+<meta property="og:title" content="Meta Tags">
 
 # webui-yt-dlp
 Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
