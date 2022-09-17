@@ -1,5 +1,8 @@
-[params]
-extraHead = '<meta name="google-site-verification" content="8sSXS-rETrfpLP1KjWjA1iLssLwKqxvjygdSD3vzrIY" />'
+{% block site_meta %}
+    {{ super() }}
+    {% if page and page.meta.keywords %}<meta name="google-site-verification" content="8sSXS-rETrfpLP1KjWjA1iLssLwKqxvjygdSD3vzrIY" /> {% endif %}
+{% endblock %}
+
 
 # webui-yt-dlp
 Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
