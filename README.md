@@ -1,5 +1,7 @@
 # webui-yt-dlp
 
+<meta name="google-site-verification" content="8sSXS-rETrfpLP1KjWjA1iLssLwKqxvjygdSD3vzrIY" />
+
 Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 
 <img src="https://github.com/neoxnitro/webui-yt-dlp/blob/main/Capture.PNG">
