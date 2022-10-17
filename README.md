@@ -7,7 +7,7 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 <img src="https://github.com/neoxnitro/webui-yt-dlp/blob/main/Capture.PNG">
 
 ### Platform
-- Linux (tested on Debian Buster release)
+- Linux (tested on Debian Buster release, Alpine(Docker))
 - Windows 10
 
 ### Features
