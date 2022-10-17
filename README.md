@@ -7,13 +7,27 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 <img src="https://github.com/neoxnitro/webui-yt-dlp/blob/main/Capture.PNG">
 
 ### Platform
-- Linux (tested on Debian Buster release)
+- Linux (tested on Debian Buster release, Alpine(Docker))
 - Windows 10
 
 ### Features
 - Support video convertion into multiple audio format (mp3, flac, wav, mp4a, aac)
 - Possibility to retrive of all supported formats and select a specific one (Video & Audio, Video only, Audio only, with various caracteristics)
 - Parallel download request is supported
+
+### Installation (with docker)
+
+```php
+   sudo docker-compose up --remove-orphans --build
+```
+
+This release use Alpine image, to changes the default listening port (8585) edit the **docker-compose.yml** file
+
+The **DockerFile** contains all required packages and tools, thus nothing to install locally, Docker will do everything for you inside a container ;)
+
+N.B a cron task was present to wipe the donwloaded files every nigth at 3am
+
+### Installation (linux)(manual launch)
 
 ### Requirement
 - Python 3.7
@@ -22,7 +36,6 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 - waitress-serve (optional, if you want make the main Python script as a linux service)
 
 ### Parameters
-
 You have the possibility to easily change the parameters directly by editing main Python script **webui-yt-dlp.py**
 
 ```python
@@ -33,9 +46,6 @@ You have the possibility to easily change the parameters directly by editing mai
    HTTP_PORT = 5005
 ```
 
-N.B if you will use waitress-serve, the server port is also present into the file **webui-yt-dlp.service**
-
-### Installation (linux)(manual launch)
 - git clone git@github.com:neoxnitro/webui-yt-dlp.git
 - cd webui-yt-dlp
 - pip3 install -r requirements.txt
@@ -71,3 +81,5 @@ root@root:~/webui-yt-dlp$ sudo systemctl status webui-yt-dlp.service
    CGroup: /system.slice/webui-yt-dlp.service
            └─14325 /usr/bin/python3 /home/root/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call webui_yt_dlp:create_app
 ```
+
+N.B to changes the default listening port (5005) edit the **webui-yt-dlp.service** file
