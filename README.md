@@ -17,11 +17,13 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 
 ### Installation (with docker)
 
-This release use Alpine image, edit the "docker-compose.yml" file to change listening port (default is 8585)
-The DockerFile describe all needed package, so nothing to install localy, Docker will do everything for you ;)
 ```php
    sudo docker-compose up --remove-orphans --build
 ```
+
+This release use Alpine image, to changes the default listening port (8585) edit the **docker-compose.yml** file
+
+The **DockerFile** contains all required packages and tools, thus nothing to install locally, Docker will do everything for you inside a container ;)
 
 N.B a cron task was present to wipe the donwloaded files every nigth at 3am
 
@@ -43,8 +45,6 @@ You have the possibility to easily change the parameters directly by editing mai
    WINDOWS_FFMPEG_PATH = "C:\\Users\\Utilisateur\\Downloads\\bin\\ffmpeg.exe"
    HTTP_PORT = 5005
 ```
-
-N.B if you will use waitress-serve, the server port is also present into the file **webui-yt-dlp.service**
 
 - git clone git@github.com:neoxnitro/webui-yt-dlp.git
 - cd webui-yt-dlp
@@ -81,3 +81,5 @@ root@root:~/webui-yt-dlp$ sudo systemctl status webui-yt-dlp.service
    CGroup: /system.slice/webui-yt-dlp.service
            └─14325 /usr/bin/python3 /home/root/.local/bin/waitress-serve --listen=0.0.0.0:5005 --call webui_yt_dlp:create_app
 ```
+
+N.B to changes the default listening port (5005) edit the **webui-yt-dlp.service** file
