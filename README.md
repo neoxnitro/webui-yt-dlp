@@ -29,7 +29,7 @@ This release use Alpine image, to changes the default listening port (8585) edit
 
 The **DockerFile** contains all required packages and tools, thus nothing to install locally, Docker will do everything for you inside a container ;)
 
-N.B a cron task was present to wipe the donwloaded files every nigth at 3am
+N.B a cron task is present to wipe the donwloaded files every nigth at 3am
 
 ### Installation (linux)(manual launch)
 
