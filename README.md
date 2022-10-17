@@ -35,6 +35,11 @@ You have the possibility to easily change the parameters directly by editing mai
 
 N.B if you will use waitress-serve, the server port is also present into the file **webui-yt-dlp.service**
 
+### Installation (docker)
+```php
+   sudo docker-compose up --remove-orphans --build
+```
+
 ### Installation (linux)(manual launch)
 - git clone git@github.com:neoxnitro/webui-yt-dlp.git
 - cd webui-yt-dlp
