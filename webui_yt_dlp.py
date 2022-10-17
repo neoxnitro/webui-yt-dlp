@@ -26,7 +26,7 @@ DOWNLOAD_DIR = "download"
 FFMPEG_PATH = ""
 LINUX_FFMPEG_PATH = "/usr/bin/ffmpeg"
 WINDOWS_FFMPEG_PATH = "C:\\Users\\Utilisateur\\Downloads\\bin\\ffmpeg.exe"
-HTTP_PORT = 5005
+HTTP_PORT = 5000
 
 super_dl_id = 999999999
 thread_running = {}
@@ -39,6 +39,7 @@ class Object(object):
 def create_app():
 
     global FFMPEG_PATH
+
 
     argv = ""
     disable_print = ''
@@ -57,6 +58,9 @@ def create_app():
     if disable_print:
         print("print is disabled")
         blockPrint()
+
+    enablePrint()
+    print("O.S Name:", os.name, file=sys.stderr)
 
     if os.name == "posix":
         FFMPEG_PATH = LINUX_FFMPEG_PATH
@@ -129,7 +133,7 @@ def fct_get_video_formats(sid, xjson):
 
     socketio.emit('video_formats', "processing", to=sid)
 
-    youtube_dl_popen = ['yt-dlp.exe']
+    youtube_dl_popen = ['yt-dlp']
 
     # currently "list" is not supported yet
     if "&list=" in arg_dict['video']:
@@ -223,7 +227,7 @@ def fct_download_video(sid, xjson, dl_id):
 
     print(fct_download_video.__name__, 'Thread creation [Download]: ' + str(json))
 
-    youtube_dl_popen = ['yt-dlp.exe']
+    youtube_dl_popen = ['yt-dlp']
 
     # currently "list" is not supported yet
     if "&list=" in arg_dict['video']:
@@ -385,6 +389,9 @@ def fct_download_video(sid, xjson, dl_id):
 
 # main function
 if __name__ == '__main__':
+
+    enablePrint()
+    print("O.S Name:", os.name, file=sys.stderr)
 
 
     create_app()
