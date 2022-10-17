@@ -26,7 +26,7 @@ DOWNLOAD_DIR = "download"
 FFMPEG_PATH = ""
 LINUX_FFMPEG_PATH = "/usr/bin/ffmpeg"
 WINDOWS_FFMPEG_PATH = "C:\\Users\\Utilisateur\\Downloads\\bin\\ffmpeg.exe"
-HTTP_PORT = 5000
+HTTP_PORT = 5005
 
 super_dl_id = 999999999
 thread_running = {}
