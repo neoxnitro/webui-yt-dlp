@@ -21,6 +21,8 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
    sudo docker-compose up --remove-orphans --build
 ```
 
+<img src="https://github.com/neoxnitro/webui-yt-dlp/blob/main/docker_install.gif">
+
 This release use Alpine image, to changes the default listening port (8585) edit the **docker-compose.yml** file
 
 The **DockerFile** contains all required packages and tools, thus nothing to install locally, Docker will do everything for you inside a container ;)
