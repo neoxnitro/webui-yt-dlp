@@ -15,6 +15,18 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 - Possibility to retrive of all supported formats and select a specific one (Video & Audio, Video only, Audio only, with various caracteristics)
 - Parallel download request is supported
 
+### Installation (with docker)
+
+This release use Alpine image, edit the "docker-compose.yml" file to change listening port (default is 8585)
+The DockerFile describe all needed package, so nothing to install localy, Docker will do everything for you ;)
+```php
+   sudo docker-compose up --remove-orphans --build
+```
+
+N.B a cron task was present to wipe the donwloaded files every nigth at 3am
+
+### Installation (linux)(manual launch)
+
 ### Requirement
 - Python 3.7
 - yt-dlp <https://github.com/yt-dlp/yt-dlp>
@@ -22,7 +34,6 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 - waitress-serve (optional, if you want make the main Python script as a linux service)
 
 ### Parameters
-
 You have the possibility to easily change the parameters directly by editing main Python script **webui-yt-dlp.py**
 
 ```python
@@ -35,12 +46,6 @@ You have the possibility to easily change the parameters directly by editing mai
 
 N.B if you will use waitress-serve, the server port is also present into the file **webui-yt-dlp.service**
 
-### Installation (docker)
-```php
-   sudo docker-compose up --remove-orphans --build
-```
-
-### Installation (linux)(manual launch)
 - git clone git@github.com:neoxnitro/webui-yt-dlp.git
 - cd webui-yt-dlp
 - pip3 install -r requirements.txt
