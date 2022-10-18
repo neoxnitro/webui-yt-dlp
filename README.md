@@ -18,7 +18,7 @@ Light web ui for yt-dlp, backhand written in python (Flask and SocketIO)
 ### Installation (with docker)
 
 ```php
-   git@github.com:neoxnitro/webui-yt-dlp.git
+   git clone git@github.com:neoxnitro/webui-yt-dlp.git
    cd webui-yt-dlp
    sudo docker-compose up --remove-orphans --build
 ```
