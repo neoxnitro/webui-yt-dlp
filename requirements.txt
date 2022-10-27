@@ -14,7 +14,7 @@ Flask-Login==0.4.0
 Flask-Migrate==2.0.2
 Flask-Script==2.0.5
 Flask-WTF==0.14.2
-Flask-User==1.0.1.5
+#Flask-User==1.0.1.5
 
 flask_socketio
 # Automated tests
