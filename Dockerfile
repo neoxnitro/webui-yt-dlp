@@ -16,6 +16,7 @@ RUN make yt-dlp && cp yt-dlp //usr/local/bin/
 WORKDIR "/code/"
 RUN apk add libffi-dev
 RUN apk add ffmpeg
+RUN pip3 install --upgrade pip
 RUN pip install -r requirements.txt
 EXPOSE 5000
 COPY . .
