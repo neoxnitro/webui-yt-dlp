@@ -23,7 +23,7 @@ def enablePrint():
 
 # global variable
 DOWNLOAD_DIR = "download"
-FFMPEG_PATH = ""
+FFMPEG_PATH = "/usr/bin/ffmpeg"
 LINUX_FFMPEG_PATH = "/usr/bin/ffmpeg"
 WINDOWS_FFMPEG_PATH = "C:\\Users\\Utilisateur\\Downloads\\bin\\ffmpeg.exe"
 HTTP_PORT = 5005
