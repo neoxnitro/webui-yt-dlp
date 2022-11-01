@@ -1,6 +1,7 @@
 version: "3.9"
 services:
-  web:
+  webui-yt-dlp:
+    container_name: webui-yt-dlp
     build: .
     ports:
       - "8585:5000"
