@@ -2,6 +2,7 @@ version: "3.9"
 services:
   webui-yt-dlp:
     container_name: webui-yt-dlp
+    restart: always
     build: .
     ports:
       - "8585:5000"
