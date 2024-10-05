@@ -342,8 +342,8 @@ def fct_download_video(sid, xjson, dl_id):
             return
 
         # looking for "destination" file name
-        if " Destination: " in process_out:
-            l_output_filename = process_out.split(" Destination: ", 1)[1]
+        if " Merging formats into " in process_out:
+            l_output_filename = process_out.split(" Merging formats into ", 1)[1]
             l_output_filename = os.path.basename(l_output_filename)
             l_output_filename = re.sub(r'.f\d{2}.', '', l_output_filename)
             print(fct_download_video.__name__, "Destination out found :[" + str(l_output_filename) + "]")
