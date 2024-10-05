@@ -2,22 +2,21 @@
 # Usage: pip install -r requirements.txt
 
 # Flask Framework
-click==7.1.2
-Flask==1.1.2
-itsdangerous==1.1.0
-Jinja2==2.11.2
-MarkupSafe==1.1.1
-Werkzeug==1.0.1
+click==8.1.7
+Flask==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+MarkupSafe==2.1.5
+Werkzeug==3.0.4
 
 # Flask Packages
-Flask-Login==0.4.0
-Flask-Migrate==2.0.2
-Flask-Script==2.0.5
-Flask-WTF==0.14.2
+Flask-Login==0.6.3
+Flask-Migrate==4.0.7
+Flask-Script==2.0.6
+Flask-WTF==1.2.1
 #Flask-User==1.0.1.5
 
 flask_socketio
 # Automated tests
-pytest==3.0.5
-pytest-cov==2.4.0
-
+pytest==8.3.3
+pytest-cov==5.0.0

@@ -85,7 +85,7 @@ def download(filename, os=None):
     donwload_location = app.root_path
     l_donwload_location = path.join(donwload_location, DOWNLOAD_DIR)
     print(download.__name__, "path: " + l_donwload_location)
-    return send_from_directory(directory=l_donwload_location, filename=filename)
+    return send_from_directory(directory=l_donwload_location, path=filename)
 
 # html icon
 @app.route('/favicon.ico')
