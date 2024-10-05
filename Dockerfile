@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
-FROM python:3.7-alpine
+# FROM python:3.7-alpine
+FROM python:3.9.20-alpine3.20
 WORKDIR /code
 ENV FLASK_APP=webui_yt_dlp.py
 ENV FLASK_RUN_HOST=0.0.0.0
