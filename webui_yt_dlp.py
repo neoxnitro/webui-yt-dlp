@@ -351,6 +351,15 @@ def fct_download_video(sid, xjson, dl_id):
             data_dict['output_filename'] = l_output_filename
             data = json.dumps(data_dict)
 
+        if "[ExtractAudio] Destination:" in process_out:
+            l_output_filename = process_out.split(" Destination: ", 1)[1]
+            l_output_filename = os.path.basename(l_output_filename)
+            l_output_filename = l_output_filename.strip('"')
+            l_output_filename = re.sub(r'.f\d{2}.', '', l_output_filename)
+            print(fct_download_video.__name__, "Destination out found :[" + str(l_output_filename) + "]")
+            data_dict['output_filename'] = l_output_filename
+            data = json.dumps(data_dict)
+
         # looking for "destination" file name (already downloaded file)
         if "has already been downloaded" in process_out:
             l_output_filename = re.split("\[download\] | has already been downloaded", process_out)[1]
