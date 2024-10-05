@@ -34,7 +34,7 @@ N.B a cron task is present to wipe the donwloaded files every nigth at 3am
 ### Installation (linux)(manual launch)
 
 ### Requirement
-- Python 3.7
+- Python 3.9
 - yt-dlp <https://github.com/yt-dlp/yt-dlp>
 - ffmpeg (optional, if you want extract audio function)
 - waitress-serve (optional, if you want make the main Python script as a linux service)
