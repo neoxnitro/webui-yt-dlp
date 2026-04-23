@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   webui-yt-dlp:
     container_name: webui-yt-dlp
