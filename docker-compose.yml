@@ -5,5 +5,5 @@ services:
     build: .
     ports:
       - "8585:5000"
-#  redis:
-#    image: "redis:alpine"
+    volumes:
+      - ./download:/code/download
