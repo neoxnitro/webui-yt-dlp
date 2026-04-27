@@ -6,10 +6,12 @@ import subprocess
 import sys
 import threading
 import time
+import zipfile
 from os import read, path
 
 from flask import Flask, render_template, send_from_directory, request
 from flask_socketio import SocketIO
+
 
 
 # Disable print
@@ -124,6 +126,19 @@ def handle_stop_thread(xjson):
 
     arg_dict = json.loads(xjson)
     thread_running[int(arg_dict['thread_id'])] = False
+
+# download playlist request from client
+@socketio.on('download_playlist')
+def handle_download_playlist(xjson):
+    global super_dl_id
+    global thread_running
+
+    print('received playlist json: ' + str(xjson))
+    sid = request.sid
+    job_thread = socketio.start_background_task(fct_download_playlist, sid, xjson, super_dl_id)
+    thread_running[job_thread.ident] = True
+    super_dl_id -= 1
+    return 'one', 2
 
 # thread function "get video formats" (asynchronous communication)
 def fct_get_video_formats(sid, xjson):
@@ -395,6 +410,152 @@ def fct_download_video(sid, xjson, dl_id):
             last_sent_process_out = process_out
         else:
             print(fct_download_video.__name__, "Hey, there are totally identical !!!")
+
+# thread function "download playlist + optional audio conversion" (asynchronous communication)
+def fct_download_playlist(sid, xjson, dl_id):
+    global thread_running
+    thread_id = threading.get_ident()
+
+    arg_dict = json.loads(xjson)
+    data_dict = {
+        'dl_id': dl_id,
+        'thread_id': str(thread_id),
+        'step': 'Thread created',
+        'progress': 'Process ...',
+        'link': arg_dict['video'],
+        'title': 'no-set',
+        'artist': 'no-set',
+        'output_filename': 'no-set',
+        'action': 'none',
+        'format': '',
+        'format_desc': ''
+    }
+    socketio.send(data_dict, json=True, to=sid)
+
+    print(fct_download_playlist.__name__, 'Thread creation [Playlist Download]')
+
+    # Create a dedicated folder for this playlist
+    playlist_folder = path.join(DOWNLOAD_DIR, 'playlist_' + str(dl_id))
+    os.makedirs(playlist_folder, exist_ok=True)
+
+    youtube_dl_popen = ['yt-dlp']
+    youtube_dl_popen.append(arg_dict['video'])
+    youtube_dl_popen.append('--yes-playlist')
+
+    # Output path and filename template
+    youtube_dl_popen.append('--paths')
+    youtube_dl_popen.append(playlist_folder)
+    youtube_dl_popen.append('-o')
+    youtube_dl_popen.append('%(playlist_index)s-%(title)s.%(ext)s')
+
+    # Audio extraction
+    if arg_dict.get('extract_audio', False):
+        youtube_dl_popen.append('--extract-audio')
+        youtube_dl_popen.append('--ffmpeg-location')
+        youtube_dl_popen.append(FFMPEG_PATH)
+        youtube_dl_popen.append('--format')
+        youtube_dl_popen.append('bestaudio')
+        youtube_dl_popen.append('--audio-format')
+        audio_fmt_map = {
+            'check_convert_into_mp3': 'mp3',
+            'check_convert_into_aac': 'aac',
+            'check_convert_into_m4a': 'm4a',
+            'check_convert_into_flac': 'flac',
+            'check_convert_into_wav': 'wav',
+        }
+        youtube_dl_popen.append(audio_fmt_map.get(arg_dict.get('audio_format', ''), 'mp3'))
+
+    # Restrict filenames to safe characters
+    youtube_dl_popen.append('--restrict-filenames')
+
+    print(fct_download_playlist.__name__, 'youtube_dl_popen:' + str(youtube_dl_popen))
+    process = subprocess.Popen(youtube_dl_popen, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    data_dict['action'] = 'stop'
+    last_sent_process_out = ""
+    proccessing = 0
+
+    while True:
+        proccessing += 1
+        if proccessing == 4:
+            proccessing = 1
+
+        # Check if the thread should stop
+        if not thread_running.get(thread_id, True):
+            process.terminate()
+            data_dict['progress'] = 'Stopped By User'
+            data_dict['step'] = 'Aborted'
+            data_dict['action'] = 'none'
+            data_dict['format'] = ''
+            data_dict['format_desc'] = ''
+            socketio.send(data_dict, json=True, to=sid)
+            return
+
+        start = time.time()
+        try:
+            process_out_raw = read(process.stdout.fileno(), 512).decode('ISO-8859-1', 'ignore')
+        except OSError as error:
+            print(fct_download_playlist.__name__, 'OSError:' + str(error))
+            data_dict['progress'] = 'OSError: ' + str(error)
+            data_dict['step'] = 'Error'
+            data_dict['action'] = 'none'
+            socketio.send(data_dict, json=True, to=sid)
+            return
+        end = time.time()
+
+        if len(process_out_raw) < 10:
+            process_out_raw = ""
+
+        process_out = process_out_raw.rstrip()
+        print(fct_download_playlist.__name__, 'process_out: [' + process_out + ']')
+
+        if not thread_running.get(thread_id, True):
+            process.terminate()
+            data_dict['progress'] = 'Stopped By User'
+            data_dict['step'] = 'Aborted'
+            data_dict['action'] = 'none'
+            socketio.send(data_dict, json=True, to=sid)
+            return
+
+        if "error" in process_out or "ERROR" in process_out:
+            print(fct_download_playlist.__name__, 'Error detected: ' + process_out)
+            data_dict['step'] = 'Error'
+            data_dict['progress'] = process_out
+            data_dict['action'] = 'none'
+            socketio.send(data_dict, json=True, to=sid)
+            return
+
+        # End of process detected
+        if not process_out and float(end - start) < float(0.00003):
+            print(fct_download_playlist.__name__, 'End of process — creating ZIP')
+            zip_filename = 'playlist_' + str(dl_id) + '.zip'
+            zip_path = path.join(DOWNLOAD_DIR, zip_filename)
+            try:
+                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                    for root, dirs, files in os.walk(playlist_folder):
+                        for file in files:
+                            file_path = path.join(root, file)
+                            arcname = os.path.relpath(file_path, playlist_folder)
+                            zipf.write(file_path, arcname)
+                data_dict['step'] = 'Done'
+                data_dict['progress'] = last_sent_process_out
+                data_dict['action'] = 'download'
+                data_dict['output_filename'] = zip_filename
+            except Exception as e:
+                data_dict['step'] = 'Error'
+                data_dict['progress'] = 'ZIP creation failed: ' + str(e)
+                data_dict['action'] = 'none'
+            socketio.send(data_dict, json=True, to=sid)
+            return
+        else:
+            data_dict['step'] = 'Playlist ' + ('.' * proccessing)
+            socketio.send(data_dict, json=True, to=sid)
+
+        if process_out and process_out != last_sent_process_out \
+                and 'Deleting original file' not in process_out:
+            data_dict['progress'] = process_out
+            socketio.send(data_dict, json=True, to=sid)
+            last_sent_process_out = process_out
 
 # main function
 if __name__ == '__main__':

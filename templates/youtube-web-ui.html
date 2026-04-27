@@ -14,7 +14,7 @@
 <div class="container mt-3">
 
     <div class="row">
-      <input name="tags" type="text" id="m" placeholder="Youtube, Instagram, Twitter, ... link here" class="form-control" autocomplete="off" />
+      <input name="tags" type="text" id="m" placeholder="Youtube, Instagram, Twitter, ... link here" class="form-control" autocomplete="off" oninput="detectPlaylist(this)" />
     </div>
 
     <div class="row" style="margin-top:10px">
@@ -31,6 +31,13 @@
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="check_extract_audio" onclick="showMe('convert_audio_format', this)">
             <label class="form-check-label" for="check_extract_audio">Extract audio</label>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top:5px">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="check_playlist">
+            <label class="form-check-label" for="check_playlist">Download playlist <small class="text-muted">(crée un fichier ZIP)</small></label>
         </div>
     </div>
 
@@ -113,6 +120,13 @@
         console.log('Connected! ID: ' + socket.id);
     });
 
+    function detectPlaylist(input)
+    {
+        var url = input.value;
+        var hasPlaylist = url.indexOf('list=') !== -1;
+        document.getElementById('check_playlist').checked = hasPlaylist;
+    }
+
     function selectme(it, box)
     {
         var vis = (box.checked) ? "block" : "none";
@@ -189,6 +203,7 @@
         var l_check_convert_into_mp3 =  document.getElementById('check_convert_into_mp3').checked ;
 
         var extract_audio = document.getElementById("check_extract_audio").checked;
+        var is_playlist = document.getElementById("check_playlist").checked;
         var audio_format = "";
 
         var list = document.querySelectorAll('[id^="check_convert_into_"]');
@@ -203,18 +218,21 @@
         json_request += ', "format_desc" : "' + selected_format_desc +'"';
         json_request += ', "extract_audio" : ' + extract_audio;
         json_request += ', "audio_format" : "' + audio_format + '"';
+        json_request += ', "is_playlist" : ' + is_playlist;
         json_request += '}';
 
         console.log("json: " + json_request);
 
-        socket.emit('download_video', json_request);
+        if (is_playlist)
+        {
+            socket.emit('download_playlist', json_request);
+        }
+        else
+        {
+            socket.emit('download_video', json_request);
+        }
         document.getElementById('m').value = "";
-
-        var Table = document.getElementById("table_format");
-	    Table.innerHTML = get_selected_format_link_string(selected_format, selected_format_desc) ;
-
-    };
-
+        document.getElementById('check_playlist').checked = false;
     function getFormats()
 	{
 	    console.log("getFormats: ");
