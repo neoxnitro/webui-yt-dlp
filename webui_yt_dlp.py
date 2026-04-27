@@ -12,7 +12,6 @@ from flask import Flask, render_template, send_from_directory, request
 from flask_socketio import SocketIO
 
 
-
 # Disable print
 def blockPrint():
     sys.stdout = open(os.devnull, 'w')
